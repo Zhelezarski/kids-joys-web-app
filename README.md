@@ -16,7 +16,9 @@ npm run build      # produkcijska različica v dist/kids-joy/browser
 
 | Kaj | Datoteka |
 | --- | --- |
-| Telefon, e-pošta, cene, besedila, igrala, dekoracije, pogosta vprašanja | `src/app/data.ts` |
+| Vsa vsebina, ko je baza povezana | admin del na `/admin` (glej ADMIN.md) |
+| Privzeta vsebina brez baze | `src/app/data.ts` |
+| Povezava z bazo | `src/app/config.ts` |
 | Fotografije | `public/slike/` (pot vpiši v `data.ts` pri `slike`) |
 | Barve in pisave | `src/styles.css` (spremenljivke v `:root`) |
 
@@ -27,6 +29,7 @@ npm run build      # produkcijska različica v dist/kids-joy/browser
 - `/dekoracije` dekoracije z baloni
 - `/rezervacija` obrazec (podpira `?igralo=id` in `?dekoracija=id`)
 - `/kontakt` kontakt in pogosta vprašanja
+- `/admin` admin del (rezervacije, igrala, dekoracije, slike, nastavitve)
 
 ## Rezervacije
 

@@ -1,6 +1,6 @@
 import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Ponudba } from '../data';
+import { Ponudba } from '../models';
 import { Ilustracija } from './ilustracija';
 
 @Component({
@@ -8,10 +8,10 @@ import { Ilustracija } from './ilustracija';
   imports: [RouterLink, Ilustracija],
   template: `
     <article class="kartica">
-      <app-ilustracija [ponudba]="ponudba()" class="slika" />
+      <app-ilustracija [ponudba]="ponudba()" />
       <div class="vsebina">
         <h3>{{ ponudba().ime }}</h3>
-        <p>{{ ponudba().kratekOpis }}</p>
+        <p>{{ ponudba().kratek_opis }}</p>
         @if (ponudba().mere) {
           <p class="meta">📏 {{ ponudba().mere }}</p>
         }
@@ -23,10 +23,10 @@ import { Ilustracija } from './ilustracija';
               Po dogovoru
             }
           </span>
-          @if (povezava()) {
-            <a class="gumb majhen" [routerLink]="povezava()">Več</a>
+          @if (ponudba().kategorija === 'igralo') {
+            <a class="gumb majhen" [routerLink]="['/igrala', ponudba().slug]">Več</a>
           } @else {
-            <a class="gumb majhen" routerLink="/rezervacija" [queryParams]="{ dekoracija: ponudba().id }">Povpraševanje</a>
+            <a class="gumb majhen" routerLink="/rezervacija" [queryParams]="{ dekoracija: ponudba().slug }">Povpraševanje</a>
           }
         </div>
       </div>
@@ -34,7 +34,6 @@ import { Ilustracija } from './ilustracija';
   `,
   styles: `
     .kartica { background: var(--bela); border-radius: 20px; overflow: hidden; box-shadow: var(--senca); display: flex; flex-direction: column; height: 100%; }
-    .slika { border-radius: 0; }
     .vsebina { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
     h3 { margin: 0; font-size: 1.25rem; }
     p { margin: 0; color: var(--siva); }
@@ -46,6 +45,4 @@ import { Ilustracija } from './ilustracija';
 })
 export class Kartica {
   ponudba = input.required<Ponudba>();
-  /** Če je podana, kartica vodi na podrobnosti; sicer na povpraševanje. */
-  povezava = input<string | null>(null);
 }

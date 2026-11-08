@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DEKORACIJE } from '../../data';
+import { Podatki } from '../../services/podatki';
 import { Kartica } from '../../shared/kartica';
 
 @Component({
@@ -15,9 +15,7 @@ import { Kartica } from '../../shared/kartica';
           Barve uskladimo z vašimi željami, ceno pa pripravimo glede na velikost postavitve.
         </p>
         <div class="mreza">
-          @for (d of dekoracije; track d.id) {
-            <app-kartica [ponudba]="d" />
-          }
+          @for (d of p.dekoracije(); track d.slug) { <app-kartica [ponudba]="d" /> }
         </div>
         <div class="kombinacija">
           <h2>🎈 + 🏰 Igralo in dekoracija skupaj</h2>
@@ -33,5 +31,5 @@ import { Kartica } from '../../shared/kartica';
   `,
 })
 export class Dekoracije {
-  dekoracije = DEKORACIJE;
+  p = inject(Podatki);
 }

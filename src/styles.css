@@ -63,3 +63,40 @@ img { max-width: 100%; }
   padding: 4px 14px;
   font-size: .85rem;
 }
+
+/* ================= ADMIN ================= */
+.adm { --adm-rob: #e6ded2; --adm-ozadje: #f6f3ee; font-size: 15px; }
+.adm h1 { font-size: 1.8rem; margin: 0 0 4px; }
+.adm h2 { font-size: 1.25rem; margin: 0 0 12px; }
+.adm-glava { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+.adm-glava p { margin: 0; color: var(--siva); }
+.adm-plosca { background: var(--bela); border: 1px solid var(--adm-rob); border-radius: 14px; padding: 18px; }
+.adm-plosca + .adm-plosca { margin-top: 16px; }
+.adm-mreza { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.adm-polje { display: flex; flex-direction: column; gap: 5px; font-weight: 700; font-size: .9rem; min-width: 0; }
+.adm-polje small { font-weight: 400; color: var(--siva); }
+.adm input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=file]), .adm textarea, .adm select {
+  font: inherit; font-weight: 400; padding: 9px 11px; border: 1px solid var(--adm-rob); border-radius: 9px; background: #fff; width: 100%; color: var(--temna);
+}
+.adm input:focus, .adm textarea:focus, .adm select:focus { outline: 2px solid var(--modra); outline-offset: -1px; border-color: transparent; }
+.adm textarea { resize: vertical; }
+.adm-gumb { display: inline-flex; align-items: center; gap: 6px; font: inherit; font-weight: 700; padding: 8px 14px; border-radius: 9px;
+  border: 1px solid var(--adm-rob); background: #fff; color: var(--temna); cursor: pointer; text-decoration: none; white-space: nowrap; }
+.adm-gumb:hover { background: var(--adm-ozadje); }
+.adm-gumb.glavni { background: var(--rdeca); border-color: var(--rdeca); color: #fff; }
+.adm-gumb.glavni:hover { background: #cf3522; }
+.adm-gumb.nevaren { color: #b42318; border-color: #f2c9c4; }
+.adm-gumb.majhen { padding: 5px 10px; font-size: .85rem; }
+.adm-gumb:disabled { opacity: .5; cursor: default; }
+.adm-vrsta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.adm-napaka { background: #fdecea; color: #b42318; border-radius: 9px; padding: 10px 12px; font-weight: 600; }
+.adm-ok { background: #e7f6ea; color: #1f7a33; border-radius: 9px; padding: 10px 12px; font-weight: 600; }
+.adm-oznaka { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: .78rem; font-weight: 800; }
+.st-nova { background: #fff1c2; color: #8a5a00; }
+.st-potrjena { background: #dff3e3; color: #1f7a33; }
+.st-zavrnjena { background: #f2e6e4; color: #8f2c20; }
+.st-zakljucena { background: #e7ecf5; color: #3d4b66; }
+.adm-zavihki { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.adm-zavihki button { font: inherit; font-weight: 700; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--adm-rob); background: #fff; cursor: pointer; }
+.adm-zavihki button.aktiven { background: var(--temna); color: #fff; border-color: var(--temna); }
+.adm-prazno { color: var(--siva); text-align: center; padding: 32px 12px; }

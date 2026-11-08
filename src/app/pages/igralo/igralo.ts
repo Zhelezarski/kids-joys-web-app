@@ -1,6 +1,6 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { IGRALA, PODJETJE } from '../../data';
+import { Podatki } from '../../services/podatki';
 import { Ilustracija } from '../../shared/ilustracija';
 
 @Component({
@@ -13,36 +13,44 @@ import { Ilustracija } from '../../shared/ilustracija';
         @if (igralo(); as i) {
           <div class="mreza-podrobno">
             <div>
-              <app-ilustracija [ponudba]="i" class="glavna" />
-              @if (i.slike.length > 1) {
-                <div class="galerija">
-                  @for (s of i.slike.slice(1); track s) { <img [src]="s" [alt]="i.ime" loading="lazy" /> }
-                </div>
+              @if (i.slike.length) {
+                <img class="glavna" [src]="i.slike[izbrana()] || i.slike[0]" [alt]="i.ime" />
+                @if (i.slike.length > 1) {
+                  <div class="galerija">
+                    @for (s of i.slike; track s; let ix = $index) {
+                      <button type="button" [class.izbrana]="ix === izbrana()" (click)="izbrana.set(ix)"><img [src]="s" [alt]="i.ime + ' ' + (ix + 1)" loading="lazy" /></button>
+                    }
+                  </div>
+                }
+              } @else {
+                <app-ilustracija [ponudba]="i" class="glavna" />
               }
             </div>
             <div>
               <h1>{{ i.ime }}</h1>
-              <p class="cena">{{ i.cena }} € <small>/ dan</small></p>
-              <p>{{ i.opis }}</p>
+              <p class="cena">
+                @if (i.cena !== null) { {{ i.cena }} € <small>/ dan</small> } @else { Po dogovoru }
+              </p>
+              <p class="opis">{{ i.opis }}</p>
               <dl>
                 @if (i.mere) { <dt>Mere</dt><dd>{{ i.mere }}</dd> }
                 @if (i.starost) { <dt>Starost</dt><dd>{{ i.starost }}</dd> }
                 @if (i.nosilnost) { <dt>Nosilnost</dt><dd>{{ i.nosilnost }}</dd> }
-                <dt>Dostava</dt><dd>Gratis v Novi Gorici, drugje po dogovoru</dd>
+                <dt>Dostava</dt><dd>{{ p.podjetje().dostava }}</dd>
                 <dt>Potrebno</dt><dd>Raven prostor in električna vtičnica</dd>
               </dl>
-              <ul class="znacilnosti">
-                @for (z of i.znacilnosti; track z) { <li>✔ {{ z }}</li> }
-              </ul>
+              <ul class="znacilnosti">@for (z of i.znacilnosti; track $index) { <li>✔ {{ z }}</li> }</ul>
               <div class="gumbi">
-                <a class="gumb" routerLink="/rezervacija" [queryParams]="{ igralo: i.id }">Rezerviraj to igralo</a>
-                <a class="gumb drugi" [href]="'tel:' + p.telefonLink">📞 Pokliči</a>
+                <a class="gumb" routerLink="/rezervacija" [queryParams]="{ igralo: i.slug }">Rezerviraj to igralo</a>
+                <a class="gumb drugi" [href]="'tel:' + p.tel()">📞 Pokliči</a>
               </div>
             </div>
           </div>
-        } @else {
+        } @else if (p.nalozeno()) {
           <h1>Igrala ni bilo mogoče najti</h1>
           <a routerLink="/igrala" class="gumb">Na seznam igral</a>
+        } @else {
+          <p>Nalagam …</p>
         }
       </div>
     </section>
@@ -50,11 +58,14 @@ import { Ilustracija } from '../../shared/ilustracija';
   styles: `
     .nazaj { display: inline-block; margin-bottom: 20px; font-weight: 700; text-decoration: none; }
     .mreza-podrobno { display: grid; grid-template-columns: 1.1fr 1fr; gap: 40px; align-items: start; }
-    .glavna { border-radius: 24px; box-shadow: var(--senca); }
-    .galerija { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
-    .galerija img { border-radius: 12px; aspect-ratio: 1; object-fit: cover; width: 100%; }
+    .glavna { display: block; width: 100%; aspect-ratio: 10 / 7; object-fit: cover; border-radius: 24px; box-shadow: var(--senca); }
+    .galerija { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; margin-top: 10px; }
+    .galerija button { padding: 0; border: 3px solid transparent; border-radius: 12px; overflow: hidden; cursor: pointer; background: none; }
+    .galerija button.izbrana { border-color: var(--rdeca); }
+    .galerija img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
     .cena { font-family: var(--naslovna); font-size: 2rem; font-weight: 800; color: var(--rdeca); margin: 0 0 8px; }
     .cena small { font-size: 1rem; color: var(--siva); }
+    .opis { white-space: pre-line; }
     dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; background: var(--bela); padding: 16px 20px; border-radius: 16px; box-shadow: var(--senca); }
     dt { font-weight: 800; }
     dd { margin: 0; color: var(--siva); }
@@ -65,8 +76,9 @@ import { Ilustracija } from '../../shared/ilustracija';
   `,
 })
 export class Igralo {
-  /** Iz poti /igrala/:id (withComponentInputBinding). */
+  /** Iz poti /igrala/:id */
   id = input<string>('');
-  p = PODJETJE;
-  igralo = computed(() => IGRALA.find((i) => i.id === this.id()));
+  p = inject(Podatki);
+  izbrana = signal(0);
+  igralo = computed(() => this.p.poSlugu(this.id()));
 }

@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { IGRALA, PODJETJE } from '../../data';
+import { Component, inject } from '@angular/core';
+import { Podatki } from '../../services/podatki';
 import { Kartica } from '../../shared/kartica';
 
 @Component({
@@ -11,20 +11,16 @@ import { Kartica } from '../../shared/kartica';
         <h1>Napihljiva igrala</h1>
         <p class="podnaslov">
           Vsa igrala so za otroke od 3 do 9 let, primerna za notranjo in zunanjo uporabo.
-          Na območju Nove Gorice je dostava brezplačna.
+          Dostava: {{ p.podjetje().dostava }}.
         </p>
         <div class="mreza">
-          @for (i of igrala; track i.id) {
-            <app-kartica [ponudba]="i" [povezava]="'/igrala/' + i.id" />
-          }
+          @for (i of p.igrala(); track i.slug) { <app-kartica [ponudba]="i" /> }
+          @empty { @if (p.nalozeno()) { <p>Trenutno ni objavljenih igral.</p> } @else { <p>Nalagam …</p> } }
         </div>
-        <p class="opomba">Cene veljajo za en dan najema in so od {{ p.cenaOd }} € do {{ p.cenaDo }} €, odvisno od modela.</p>
       </div>
     </section>
   `,
-  styles: `.opomba { margin-top: 28px; color: var(--siva); font-size: .95rem; }`,
 })
 export class Igrala {
-  p = PODJETJE;
-  igrala = IGRALA;
+  p = inject(Podatki);
 }
