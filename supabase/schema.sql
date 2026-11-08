@@ -125,3 +125,26 @@ create policy "kidsjoy admin brise" on storage.objects for delete to authenticat
 --  Priporočeno: Authentication → Sign In / Providers → izklopi
 --  "Allow new users to sign up", da se nihče drug ne more registrirati.
 -- =====================================================================
+
+-- ---------- Samodejne admin pravice za izbrane e-pošte ----------
+create table if not exists public.admin_emaili (email text primary key);
+alter table public.admin_emaili enable row level security;
+drop policy if exists "admini berejo emaile" on public.admin_emaili;
+create policy "admini berejo emaile" on public.admin_emaili for select using (public.je_admin());
+insert into public.admin_emaili (email) values ('bzelezarski@gmail.com'), ('kidsjoy.igrala@gmail.com') on conflict do nothing;
+
+create or replace function public.nov_uporabnik_admin() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if exists (select 1 from public.admin_emaili where lower(email) = lower(new.email)) then
+    insert into public.admini (user_id) values (new.id) on conflict do nothing;
+  end if;
+  return new;
+end;
+$$;
+revoke execute on function public.nov_uporabnik_admin() from public, anon, authenticated;
+
+drop trigger if exists kidsjoy_nov_uporabnik_admin on auth.users;
+create trigger kidsjoy_nov_uporabnik_admin
+  after insert on auth.users
+  for each row execute function public.nov_uporabnik_admin();
