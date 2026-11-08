@@ -48,7 +48,8 @@ import { Logo } from './shared/logo';
           @if (p.podjetje().instagram) { <a [href]="'https://instagram.com/' + p.podjetje().instagram" target="_blank" rel="noopener">Instagram &#64;{{ p.podjetje().instagram }}</a> }
         </div>
       </div>
-      <p class="okvir avtorske">© {{ leto }} {{ p.podjetje().ime }} · <a routerLink="/admin">Admin</a></p>
+      <p class="okvir avtorske">© {{ leto }} {{ p.podjetje().pravnoIme || p.podjetje().ime }} ·
+        <a routerLink="/pogoji">Splošni pogoji</a> · <a routerLink="/zasebnost">Zasebnost</a> · <a routerLink="/admin">Admin</a></p>
     </footer>
 
     <a class="klic-plavajoc" [href]="'tel:' + p.tel()" aria-label="Pokliči">📞 Pokliči</a>

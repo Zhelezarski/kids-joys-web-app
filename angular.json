@@ -14,14 +14,36 @@
           "options": {
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
-            "assets": [{ "glob": "**/*", "input": "public" }],
-            "styles": ["src/styles.css"]
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              }
+            ],
+            "styles": [
+              "node_modules/@fontsource/baloo-2/600.css",
+              "node_modules/@fontsource/baloo-2/700.css",
+              "node_modules/@fontsource/baloo-2/800.css",
+              "node_modules/@fontsource/nunito/400.css",
+              "node_modules/@fontsource/nunito/600.css",
+              "node_modules/@fontsource/nunito/700.css",
+              "node_modules/@fontsource/nunito/800.css",
+              "src/styles.css"
+            ]
           },
           "configurations": {
             "production": {
               "budgets": [
-                { "type": "initial", "maximumWarning": "500kB", "maximumError": "1MB" },
-                { "type": "anyComponentStyle", "maximumWarning": "8kB", "maximumError": "16kB" }
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "8kB",
+                  "maximumError": "16kB"
+                }
               ],
               "outputHashing": "all"
             },
@@ -36,8 +58,12 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "configurations": {
-            "production": { "buildTarget": "kids-joy:build:production" },
-            "development": { "buildTarget": "kids-joy:build:development" }
+            "production": {
+              "buildTarget": "kids-joy:build:production"
+            },
+            "development": {
+              "buildTarget": "kids-joy:build:development"
+            }
           },
           "defaultConfiguration": "development"
         }

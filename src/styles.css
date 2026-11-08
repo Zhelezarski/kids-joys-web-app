@@ -100,3 +100,18 @@ img { max-width: 100%; }
 .adm-zavihki button { font: inherit; font-weight: 700; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--adm-rob); background: #fff; cursor: pointer; }
 .adm-zavihki button.aktiven { background: var(--temna); color: #fff; border-color: var(--temna); }
 .adm-prazno { color: var(--siva); text-align: center; padding: 32px 12px; }
+
+/* ================= PRAVNA BESEDILA ================= */
+.pravno { max-width: 760px; }
+.pravno h1 { font-size: clamp(2rem, 5vw, 2.8rem); }
+.pravno h2 { font-size: 1.35rem; margin: 32px 0 8px; }
+.pravno p, .pravno li { color: var(--temna); }
+.pravno ul { padding-left: 22px; }
+.pravno li { margin: 4px 0; }
+.pravno .velja { color: var(--siva); margin-top: 0; }
+.pravno .okvircek { background: var(--bela); border-radius: 16px; padding: 16px 20px; box-shadow: var(--senca); }
+.pravno .okvircek p { margin: 2px 0; }
+.pravno table { width: 100%; border-collapse: collapse; background: var(--bela); border-radius: 12px; overflow: hidden; font-size: .95rem; }
+.pravno th, .pravno td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #eee4d6; vertical-align: top; }
+.pravno th { background: #fbf4e8; }
+.pravno .tabela { overflow-x: auto; }

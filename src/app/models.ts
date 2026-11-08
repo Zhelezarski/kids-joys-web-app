@@ -39,6 +39,12 @@ export interface Podjetje {
   dostava: string;
   cenaOd: number;
   cenaDo: number;
+  /** Pravni podatki (pogoji, zasebnost). */
+  pravnoIme: string;
+  sedez: string;
+  maticna: string;
+  davcna: string;
+  ddvZavezanec: boolean;
 }
 
 export interface Prednost {
@@ -61,6 +67,8 @@ export interface Nastavitve {
   prednosti: Prednost[];
   kraji: string[];
   vprasanja: Vprasanje[];
+  /** Pogoji odpovedi rezervacije (splošni pogoji, točka 4). */
+  pogojiOdpovedi: string;
 }
 
 export interface Postavka {
@@ -84,4 +92,5 @@ export interface Rezervacija {
   skupaj: number;
   status: StatusRezervacije;
   opomba_admin: string;
+  sprejeti_pogoji?: boolean;
 }

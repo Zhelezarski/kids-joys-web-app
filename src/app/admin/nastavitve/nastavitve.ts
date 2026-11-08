@@ -43,6 +43,22 @@ import { Podatki } from '../../services/podatki';
         </section>
 
         <section class="adm-plosca">
+          <h2>Pravni podatki <small>(prikazani v splošnih pogojih in politiki zasebnosti)</small></h2>
+          @if (!n.podjetje.pravnoIme || !n.podjetje.maticna) {
+            <p class="adm-napaka">Po zakonu morajo biti na strani navedeni polno ime podjetja ali s.p., sedež in matična številka. Vpiši jih tukaj.</p>
+          }
+          <div class="adm-mreza">
+            <label class="adm-polje">Polno pravno ime <small>npr. Janez Novak s.p. ali Kids Joy d.o.o.</small><input name="pravnoIme" [(ngModel)]="n.podjetje.pravnoIme" /></label>
+            <label class="adm-polje">Sedež <small>naslov iz poslovnega registra</small><input name="sedez" [(ngModel)]="n.podjetje.sedez" /></label>
+            <label class="adm-polje">Matična številka<input name="maticna" [(ngModel)]="n.podjetje.maticna" /></label>
+            <label class="adm-polje">Davčna številka<input name="davcna" [(ngModel)]="n.podjetje.davcna" placeholder="SI12345678" /></label>
+          </div>
+          <label class="kljukica"><input type="checkbox" name="ddv" [(ngModel)]="n.podjetje.ddvZavezanec" /> Podjetje je zavezanec za DDV (cene vključujejo DDV)</label>
+          <label class="adm-polje" style="margin-top:14px">Pogoji odpovedi rezervacije <small>prikazano v splošnih pogojih, točka 4</small>
+            <textarea name="pogojiOdpovedi" rows="3" [(ngModel)]="n.pogojiOdpovedi"></textarea></label>
+        </section>
+
+        <section class="adm-plosca">
           <h2>Naslovnica</h2>
           <div class="stolpec">
             <label class="adm-polje">Velik naslov<input name="heroNaslov" [(ngModel)]="n.hero.naslov" /></label>
@@ -99,6 +115,7 @@ import { Podatki } from '../../services/podatki';
   `,
   styles: `
     .vrh { position: sticky; top: 56px; z-index: 5; background: var(--adm-ozadje); padding: 8px 0; margin: -8px 0 12px; }
+    .kljukica { display: flex; gap: 8px; align-items: center; font-weight: 600; margin-top: 12px; }
     .stolpec { display: flex; flex-direction: column; gap: 12px; }
     h2 small { font-weight: 400; color: var(--siva); font-size: .85rem; }
     .vrstica { display: grid; gap: 8px; align-items: center; margin-top: 8px; }

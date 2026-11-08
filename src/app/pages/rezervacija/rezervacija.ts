@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { Postavka, Rezervacija as Rez } from '../../models';
 import { Podatki } from '../../services/podatki';
 import { Supa } from '../../services/supa';
@@ -6,6 +7,7 @@ import { danes, datumSl } from '../../util';
 
 @Component({
   selector: 'app-rezervacija',
+  imports: [RouterLink],
   template: `
     <section class="sekcija">
       <div class="okvir ozek">
@@ -83,6 +85,13 @@ import { danes, datumSl } from '../../util';
               </label>
             </fieldset>
 
+            <label class="soglasje">
+              <input type="checkbox" [checked]="pogoji()" (change)="pogoji.set(!pogoji())" />
+              <span>Strinjam se s <a routerLink="/pogoji" target="_blank">splošnimi pogoji najema</a> in sem seznanjen/a s
+                <a routerLink="/zasebnost" target="_blank">politiko zasebnosti</a>. *</span>
+            </label>
+            @if (poslano() && !pogoji()) { <p class="napaka">Za oddajo rezervacije potrdite splošne pogoje.</p> }
+
             @if (ocena() > 0) {
               <p class="ocena">Okvirna cena: <b>{{ ocena() }} €</b>{{ imaPoDogovoru() ? ' + postavke po dogovoru' : '' }}</p>
             }
@@ -126,6 +135,8 @@ import { danes, datumSl } from '../../util';
     .ocena { background: #fff4cc; border-radius: 14px; padding: 12px 16px; margin: 0; }
     .gumbi { display: flex; gap: 14px; flex-wrap: wrap; }
     .drobno { color: var(--siva); font-size: .85rem; margin: 0; }
+    .soglasje { flex-direction: row; align-items: flex-start; gap: 10px; font-weight: 600; margin: 0; }
+    .soglasje input { width: 20px; height: 20px; flex: none; margin-top: 2px; accent-color: var(--rdeca); }
     .uspeh { background: var(--bela); border-radius: 24px; padding: 28px; box-shadow: var(--senca); border-top: 6px solid var(--zelena); }
     @media (max-width: 620px) { .izbire, .vrsta { grid-template-columns: 1fr; } }
   `,
@@ -152,6 +163,7 @@ export class Rezervacija {
   poslano = signal(false);
   stanje = signal<'urejam' | 'posiljam' | 'poslano'>('urejam');
   napaka = signal('');
+  pogoji = signal(false);
 
   postavke = computed<Postavka[]>(() =>
     [...this.p.igrala(), ...this.p.dekoracije()]
@@ -160,7 +172,7 @@ export class Rezervacija {
   );
   ocena = computed(() => this.postavke().reduce((s, x) => s + (x.cena ?? 0), 0));
   imaPoDogovoru = computed(() => this.postavke().some((x) => x.cena === null));
-  veljavno = computed(() => this.izbrano().size > 0 && !!this.datum() && !!this.kraj() && !!this.ime() && !!this.telefon());
+  veljavno = computed(() => this.pogoji() && this.izbrano().size > 0 && !!this.datum() && !!this.kraj() && !!this.ime() && !!this.telefon());
 
   constructor() {
     effect(() => {
@@ -220,7 +232,7 @@ export class Rezervacija {
     const r: Rez = {
       datum: this.datum(), kraj: this.kraj(), prostor: this.prostor(), ime: this.ime(), telefon: this.telefon(),
       email: this.email(), opomba: this.opomba(), postavke: this.postavke(), skupaj: this.ocena(),
-      status: 'nova', opomba_admin: '',
+      status: 'nova', opomba_admin: '', sprejeti_pogoji: true,
     };
     const err = await this.p.oddaj(r);
     if (err) {

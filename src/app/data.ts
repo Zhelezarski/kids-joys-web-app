@@ -19,6 +19,11 @@ export const PRIVZETE_NASTAVITVE: Nastavitve = {
     dostava: 'Gratis v Novi Gorici, drugje po dogovoru',
     cenaOd: 60,
     cenaDo: 100,
+    pravnoIme: '',
+    sedez: '',
+    maticna: '',
+    davcna: '',
+    ddvZavezanec: false,
   },
   hero: {
     naslov: 'Skakanje, smeh in nepozabne zabave',
@@ -31,6 +36,8 @@ export const PRIVZETE_NASTAVITVE: Nastavitve = {
     { ikona: '🏠', naslov: 'Notri in zunaj', opis: 'Primerni za dvorane, vrtce in vrtove.' },
     { ikona: '⚡', naslov: 'Hitra postavitev', opis: 'Pripeljemo, postavimo in pospravimo mi.' },
   ],
+  pogojiOdpovedi:
+    'Rezervacijo lahko brezplačno odpoveste najpozneje 2 dni pred dogodkom. Pri poznejši odpovedi vam lahko zaračunamo stroške, ki so nam že nastali (npr. prevoz), največ do višine 30 % cene najema.',
   kraji: ['Kanal', 'Renče', 'Bilje', 'Nova Gorica', 'Solkan', 'Dijaški dom'],
   vprasanja: [
     { vprasanje: 'Koliko stane najem?', odgovor: 'Cena na dan je od 60 € do 100 €, odvisno od igrala. Za dekoracije pripravimo ponudbo glede na velikost in želje.' },

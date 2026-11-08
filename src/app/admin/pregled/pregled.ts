@@ -2,6 +2,7 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Rezervacija } from '../../models';
 import { AdminApi } from '../../services/admin-api';
+import { Podatki } from '../../services/podatki';
 import { danes, datumSl } from '../../util';
 
 @Component({
@@ -14,6 +15,9 @@ import { danes, datumSl } from '../../util';
     </div>
 
     @if (napaka()) { <p class="adm-napaka">{{ napaka() }}</p> }
+    @if (!podatki.podjetje().pravnoIme || !podatki.podjetje().maticna) {
+      <p class="adm-napaka">Manjkajo pravni podatki podjetja (polno ime, matična številka). Dopolni jih v <a routerLink="/admin/nastavitve">Nastavitvah</a>.</p>
+    }
 
     <div class="stevilke">
       <a class="adm-plosca st" routerLink="/admin/rezervacije" [queryParams]="{ f: 'nove' }">
@@ -56,6 +60,7 @@ import { danes, datumSl } from '../../util';
 })
 export class Pregled implements OnInit {
   api = inject(AdminApi);
+  podatki = inject(Podatki);
   datumSl = datumSl;
   rez = signal<Rezervacija[]>([]);
   nalagam = signal(true);

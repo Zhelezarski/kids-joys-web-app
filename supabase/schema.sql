@@ -148,3 +148,19 @@ drop trigger if exists kidsjoy_nov_uporabnik_admin on auth.users;
 create trigger kidsjoy_nov_uporabnik_admin
   after insert on auth.users
   for each row execute function public.nov_uporabnik_admin();
+
+-- ---------- GDPR: potrditev pogojev in samodejno brisanje ----------
+alter table public.rezervacije add column if not exists sprejeti_pogoji boolean not null default false;
+
+alter policy "oddaja rezervacije" on public.rezervacije
+  with check (status = 'nova' and opomba_admin = '' and datum >= current_date and sprejeti_pogoji = true);
+
+-- Rezervacije se izbrišejo 12 mesecev po datumu dogodka (vsak dan ob 3:17 UTC).
+create extension if not exists pg_cron with schema pg_catalog;
+select cron.unschedule('kidsjoy-brisanje-starih-rezervacij')
+  where exists (select 1 from cron.job where jobname = 'kidsjoy-brisanje-starih-rezervacij');
+select cron.schedule(
+  'kidsjoy-brisanje-starih-rezervacij',
+  '17 3 * * *',
+  $$delete from public.rezervacije where datum < current_date - interval '12 months'$$
+);
