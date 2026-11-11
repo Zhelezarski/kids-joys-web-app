@@ -26,7 +26,7 @@ export const PRIVZETE_NASTAVITVE: Nastavitve = {
     ddvZavezanec: false,
   },
   hero: {
-    naslov: 'Skakanje, smeh in nepozabne zabave',
+    naslov: 'Napihljiva igrala in dekoracije z baloni za nepozabne zabave',
     podnaslov: 'Pripeljemo, postavimo in pospravimo, vi pa uživate.',
   },
   obvestilo: '',
