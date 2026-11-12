@@ -23,11 +23,7 @@ import { Ilustracija } from './ilustracija';
               Po dogovoru
             }
           </span>
-          @if (ponudba().kategorija === 'igralo') {
-            <a class="gumb majhen" [routerLink]="['/igrala', ponudba().slug]">Več</a>
-          } @else {
-            <a class="gumb majhen" routerLink="/rezervacija" [queryParams]="{ dekoracija: ponudba().slug }">Povpraševanje</a>
-          }
+          <a class="gumb majhen" [routerLink]="[ponudba().kategorija === 'igralo' ? '/igrala' : '/dekoracije', ponudba().slug]">Več</a>
         </div>
       </div>
     </article>
