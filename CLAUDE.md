@@ -40,6 +40,11 @@ npm run build    # dist/kids-joy/browser
 Push to `main` deploys automatically (~1 min). Check with `gh run list -R Zhelezarski/kids-joys-web-app -L 3`.
 GitHub Actions sometimes gets stuck in `queued`; re-run from the Actions tab or `gh workflow run deploy.yml`.
 
+## Delovni postopek (obvezno)
+
+Vsaka sprememba gre prek pull requesta: razvoj na veji `claude/...`, `npm run build` mora uspeti, nato PR v `main`
+in merge, da GitHub Actions objavi stran. Nikoli ne pushaj neposredno na `main`. To velja za vsako spremembo, vsakič.
+
 ## Structure
 
 ```
