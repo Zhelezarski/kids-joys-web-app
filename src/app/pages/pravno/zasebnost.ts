@@ -2,7 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Podatki } from '../../services/podatki';
 
-export const PRAVNO_VELJA_OD = '8. 11. 2026';
+export const PRAVNO_VELJA_OD = '12. 11. 2026';
 
 @Component({
   selector: 'app-zasebnost',
@@ -46,25 +46,29 @@ export const PRAVNO_VELJA_OD = '8. 11. 2026';
             <thead><tr><th>Namen</th><th>Pravna podlaga</th></tr></thead>
             <tbody>
               <tr><td>Obravnava povpraševanja, potrditev termina, dostava in izvedba najema</td><td>Sklenitev in izvajanje pogodbe (6. člen GDPR, točka (b) odstavka 1)</td></tr>
+              <tr><td>Pošiljanje e-poštnih obvestil o rezervaciji (potrdilo o prejemu, potrditev ali zavrnitev termina, opomnik dan pred dogodkom), če ste navedli e-pošto</td><td>Sklenitev in izvajanje pogodbe (točka (b))</td></tr>
               <tr><td>Izdaja računa in vodenje poslovnih knjig</td><td>Zakonska obveznost (točka (c)), npr. Zakon o davku na dodano vrednost in davčni predpisi</td></tr>
               <tr><td>Reševanje pritožb in uveljavljanje zahtevkov</td><td>Zakoniti interes (točka (f))</td></tr>
               <tr><td>Varnost spletne strani in admin dostopa</td><td>Zakoniti interes (točka (f))</td></tr>
             </tbody>
           </table>
         </div>
+        <p>E-poštna obvestila so izključno storitvena sporočila o vaši rezervaciji. Ne pošiljamo novic ali oglasnih sporočil.</p>
         <p>Podatkov ne uporabljamo za oglaševanje, jih ne prodajamo in na njihovi podlagi ne sprejemamo avtomatiziranih odločitev ali profiliramo.</p>
 
         <h2>4. Kako dolgo hranimo podatke</h2>
         <ul>
           <li><b>Rezervacije in povpraševanja</b> se iz baze samodejno izbrišejo 12 mesecev po datumu dogodka. Zavrnjena povpraševanja lahko izbrišemo tudi prej.</li>
           <li><b>Računi</b> se hranijo 10 let po koncu leta, na katero se nanašajo, kot zahteva davčna zakonodaja.</li>
+          <li><b>Evidenca poslanih e-poštnih obvestil</b> (vrsta sporočila in čas pošiljanja, brez vsebine) se izbriše skupaj z rezervacijo, najpozneje po 12 mesecih.</li>
           <li><b>Sporočila</b> po telefonu, SMS ali e-pošti hranimo, dokler so potrebna za izvedbo najema in morebitne pritožbe, nato jih izbrišemo.</li>
         </ul>
 
         <h2>5. Kdo ima dostop do podatkov</h2>
-        <p>Do rezervacij ima dostop samo ponudnik prek zaščitenega admin dela. Pri delovanju strani nam pomagata obdelovalca, ki podatke obdelujeta samo po naših navodilih:</p>
+        <p>Do rezervacij ima dostop samo ponudnik prek zaščitenega admin dela. Pri delovanju strani nam pomagajo obdelovalci, ki podatke obdelujejo samo po naših navodilih:</p>
         <ul>
           <li><b>Supabase Inc.</b> gosti bazo rezervacij in fotografije. Podatki so shranjeni v podatkovnem centru v Frankfurtu (Nemčija, EU).</li>
+          <li><b>Sendinblue SAS (Brevo)</b>, Pariz, Francija (EU), pošilja e-poštna obvestila o rezervaciji. Prejme vaše ime, e-poštni naslov in podatke o rezervaciji, ki so v sporočilu.</li>
           <li><b>GitHub Inc.</b> (GitHub Pages) gosti spletno stran. Za zagotavljanje varnosti in delovanja lahko začasno beleži IP-naslov obiskovalca.</li>
         </ul>
         <p>Če ponudnik ali njegovi podobdelovalci podatke obdelujejo zunaj Evropskega gospodarskega prostora, je prenos zavarovan s standardnimi pogodbenimi klavzulami Evropske komisije ali z okvirom EU-ZDA za zasebnost podatkov.

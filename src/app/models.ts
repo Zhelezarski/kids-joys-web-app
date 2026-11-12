@@ -58,6 +58,17 @@ export interface Vprasanje {
   odgovor: string;
 }
 
+/** E-poštna obvestila (pošilja Edge Function "obvestila"). */
+export interface Obvestila {
+  /** Kam pošiljamo obvestila lastniku; prazno = e-pošta podjetja. */
+  email: string;
+  lastnikNova: boolean;
+  lastnikDnevni: boolean;
+  strankaPrejeta: boolean;
+  strankaStatus: boolean;
+  strankaOpomnik: boolean;
+}
+
 /** Vse nastavitve strani (ena vrstica v tabeli "nastavitve"). */
 export interface Nastavitve {
   podjetje: Podjetje;
@@ -69,6 +80,7 @@ export interface Nastavitve {
   vprasanja: Vprasanje[];
   /** Pogoji odpovedi rezervacije (splošni pogoji, točka 4). */
   pogojiOdpovedi: string;
+  obvestila: Obvestila;
 }
 
 export interface Postavka {
@@ -93,4 +105,13 @@ export interface Rezervacija {
   status: StatusRezervacije;
   opomba_admin: string;
   sprejeti_pogoji?: boolean;
+  /** Samo v adminu: poslana e-poštna sporočila za to rezervacijo. */
+  email_dnevnik?: EmailVnos[];
+}
+
+export interface EmailVnos {
+  vrsta: string;
+  uspeh: boolean;
+  napaka: string;
+  created_at: string;
 }

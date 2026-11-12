@@ -132,7 +132,14 @@ export class AdminApi {
 
   // ---------- Rezervacije ----------
   async rezervacije(): Promise<Rezervacija[]> {
-    const { data, error } = await this.c.from('rezervacije').select('*').order('datum', { ascending: true });
+    let { data, error } = await this.c
+      .from('rezervacije')
+      .select('*, email_dnevnik(vrsta, uspeh, napaka, created_at)')
+      .order('datum', { ascending: true });
+    // Če tabela email_dnevnik (še) ne obstaja, naloži brez nje.
+    if (error && /email_dnevnik/i.test(error.message)) {
+      ({ data, error } = await this.c.from('rezervacije').select('*').order('datum', { ascending: true }));
+    }
     napaka(error);
     return ((data ?? []) as Rezervacija[]).map((r) => ({ ...r, skupaj: Number(r.skupaj) }));
   }
@@ -143,7 +150,7 @@ export class AdminApi {
   }
 
   async dodajRezervacijo(r: Rezervacija): Promise<void> {
-    const { id: _id, created_at: _c, ...vrstica } = r;
+    const { id: _id, created_at: _c, email_dnevnik: _e, ...vrstica } = r;
     const { error } = await this.c.from('rezervacije').insert(vrstica);
     napaka(error);
   }
@@ -151,6 +158,21 @@ export class AdminApi {
   async izbrisiRezervacijo(id: string): Promise<void> {
     const { error } = await this.c.from('rezervacije').delete().eq('id', id);
     napaka(error);
+  }
+
+  // ---------- E-pošta ----------
+  /** Pošlje testno sporočilo na e-naslov za obvestila. Vrne opis napake ali null. */
+  async testniEmail(): Promise<string | null> {
+    const { data, error } = await this.c.functions.invoke('obvestila', { body: { dogodek: 'test' } });
+    if (error) {
+      let opis = error.message;
+      try {
+        const telo = await (error as { context?: Response }).context?.json();
+        if (telo?.napaka) opis = telo.napaka;
+      } catch { /* brez telesa */ }
+      return /Failed to send|fetch/i.test(opis) ? 'Funkcija »obvestila« ni dosegljiva (ali je nameščena v Supabase?).' : opis;
+    }
+    return data?.ok ? null : (data?.napaka ?? 'Neznana napaka.');
   }
 
   // ---------- Nastavitve ----------

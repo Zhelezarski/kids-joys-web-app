@@ -65,6 +65,7 @@ src/app/
 src/styles.css         Global tokens (--rdeca, --modra, --rumena, --zelena, --vijolicna, --kremna ...), public, admin (.adm-*) and legal (.pravno) styles
 supabase/schema.sql    Full schema, RLS, storage, functions, triggers, cron. Re-runnable.
 supabase/seed.sql      Initial content generated from data.ts
+supabase/functions/obvestila/index.ts  Edge Function: all emails (Brevo API), deployed via Supabase MCP/CLI, verify_jwt=false
 ADMIN.md               Admin setup guide (Slovenian)
 ```
 
@@ -85,6 +86,15 @@ ADMIN.md               Admin setup guide (Slovenian)
   never read them; admins can do everything. Storage bucket `slike` is public-read, admin-write.
 - pg_cron job `kidsjoy-brisanje-starih-rezervacij` deletes bookings 12 months after the event (GDPR retention,
   stated in the privacy policy).
+
+- `email_dnevnik`: log of sent emails (vrsta, uspeh, napaka; no content), FK to rezervacije on delete cascade;
+  admin read-only, also used to send each email only once.
+- Emails: trigger `kidsjoy_rezervacija_obvestila` (insert / status change) and pg_cron `kidsjoy-dnevna-obvestila`
+  (16:07 UTC) call `obvestila_poslji()` → pg_net POST to Edge Function `obvestila` with header `x-kidsjoy-skrivnost`
+  (Vault secret `kidsjoy_obvestila_skrivnost`, checked by the function via service-role-only RPC `obvestila_skrivnost()`).
+  Admin "test" event is authorized with the admin's JWT. Toggles + recipient live in `Nastavitve.obvestila`.
+  Function secrets: `BREVO_API_KEY` (required), `EMAIL_POSILJATELJ`, `STRAN_URL` (optional). Brevo is listed as a
+  processor in the privacy policy; changing provider means updating `/zasebnost`.
 
 Any schema change: apply it to Supabase AND append it to `supabase/schema.sql` (keep the file re-runnable).
 Supabase security advisor warns that `je_admin` and `zasedena_igrala` are executable by anon: intentional.
@@ -108,7 +118,7 @@ If you add analytics, embeds, payments, newsletters etc., the privacy policy and
 - [ ] Transfer Supabase project to the friend's organization (Project Settings → General → Transfer project) and,
       optionally, the GitHub repo. Friend should sign the Supabase DPA.
 - [ ] Custom domain (friend buys e.g. a `.si` domain): add `CNAME`, set base href to `/`, configure DNS and Pages.
-- [ ] Bookings are not emailed to the owner; they only appear in admin. Possible addition: Supabase Edge Function or
-      database webhook that sends an email/SMS on new `rezervacije` row (update privacy policy processors if a new
-      provider is used).
+- [ ] Emails are implemented but need a Brevo account: verify sender, set `BREVO_API_KEY` in Supabase Edge Function
+      secrets, then admin → Nastavitve → "Pošlji testno sporočilo" (see ADMIN.md). Optionally configure Brevo SMTP for
+      Supabase Auth emails (password reset). SMS notifications not implemented.
 - [ ] Legal texts are carefully drafted but not lawyer-reviewed; recommend a quick review before launch.

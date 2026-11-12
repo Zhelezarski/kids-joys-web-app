@@ -59,6 +59,25 @@ import { Podatki } from '../../services/podatki';
         </section>
 
         <section class="adm-plosca">
+          <h2>E-poštna obvestila</h2>
+          <p class="opis">Pošiljanje poteka prek Brevo. Navodila za nastavitev so v ADMIN.md. Spremembe shrani z gumbom »Shrani nastavitve«.</p>
+          <label class="adm-polje">E-pošta za obvestila <small>prazno = {{ n.podjetje.email }}</small>
+            <input type="email" name="obvEmail" [(ngModel)]="n.obvestila.email" [placeholder]="n.podjetje.email" /></label>
+          <p class="naslov">Vam</p>
+          <label class="kljukica"><input type="checkbox" name="obvLN" [(ngModel)]="n.obvestila.lastnikNova" /> Nova rezervacija s spletne strani (takoj)</label>
+          <label class="kljukica"><input type="checkbox" name="obvLD" [(ngModel)]="n.obvestila.lastnikDnevni" /> Dnevni pregled ob ~17h: jutrišnji dogodki in rezervacije, ki čakajo na potrditev</label>
+          <p class="naslov">Stranki <small>(samo če je navedla e-pošto)</small></p>
+          <label class="kljukica"><input type="checkbox" name="obvSP" [(ngModel)]="n.obvestila.strankaPrejeta" /> Potrdilo o prejemu povpraševanja</label>
+          <label class="kljukica"><input type="checkbox" name="obvSS" [(ngModel)]="n.obvestila.strankaStatus" /> Potrditev ali zavrnitev, ko spremenite status rezervacije</label>
+          <label class="kljukica"><input type="checkbox" name="obvSO" [(ngModel)]="n.obvestila.strankaOpomnik" /> Opomnik dan pred dogodkom (potrjene rezervacije)</label>
+          <div class="adm-vrsta" style="margin-top:14px">
+            <button class="adm-gumb" type="button" [disabled]="testiram()" (click)="testniEmail()">{{ testiram() ? 'Pošiljam …' : '✉️ Pošlji testno sporočilo' }}</button>
+            @if (testOk()) { <span class="adm-ok">{{ testOk() }}</span> }
+          </div>
+          @if (testNapaka()) { <p class="adm-napaka" style="margin-top:10px">{{ testNapaka() }}</p> }
+        </section>
+
+        <section class="adm-plosca">
           <h2>Naslovnica</h2>
           <div class="stolpec">
             <label class="adm-polje">Velik naslov<input name="heroNaslov" [(ngModel)]="n.hero.naslov" /></label>
@@ -117,6 +136,9 @@ import { Podatki } from '../../services/podatki';
     .vrh { position: sticky; top: 56px; z-index: 5; background: var(--adm-ozadje); padding: 8px 0; margin: -8px 0 12px; }
     .kljukica { display: flex; gap: 8px; align-items: center; font-weight: 600; margin-top: 12px; }
     .stolpec { display: flex; flex-direction: column; gap: 12px; }
+    .opis { color: var(--siva); margin: -4px 0 12px; }
+    .naslov { font-weight: 700; margin: 16px 0 0; }
+    .naslov small { font-weight: 400; color: var(--siva); }
     h2 small { font-weight: 400; color: var(--siva); font-size: .85rem; }
     .vrstica { display: grid; gap: 8px; align-items: center; margin-top: 8px; }
     .prednost { grid-template-columns: 56px 1fr 2fr auto; }
@@ -136,6 +158,9 @@ export class AdminNastavitve implements OnInit {
   napaka = signal('');
   ok = signal('');
   shranjujem = signal(false);
+  testiram = signal(false);
+  testOk = signal('');
+  testNapaka = signal('');
 
   async ngOnInit() {
     await this.podatki.nalozi();
@@ -171,6 +196,23 @@ export class AdminNastavitve implements OnInit {
       this.napaka.set((e as Error).message);
     } finally {
       this.shranjujem.set(false);
+    }
+  }
+
+  async testniEmail() {
+    const n = this.n();
+    if (!n) return;
+    this.testOk.set('');
+    this.testNapaka.set('');
+    this.testiram.set(true);
+    try {
+      const napaka = await this.api.testniEmail();
+      if (napaka) this.testNapaka.set(napaka);
+      else this.testOk.set(`Poslano na ${this.podatki.nastavitve().obvestila.email || this.podatki.podjetje().email}. Preverite tudi mapo z neželeno pošto.`);
+    } catch (e) {
+      this.testNapaka.set((e as Error).message);
+    } finally {
+      this.testiram.set(false);
     }
   }
 

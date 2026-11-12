@@ -18,6 +18,9 @@ import { danes, datumSl } from '../../util';
             <h2>🎉 Hvala, povpraševanje smo prejeli!</h2>
             <p>Za {{ datumSl(datum()) }} vam bomo kmalu odgovorili na {{ telefon() }}. Za hitrejši odgovor nas lahko pokličete na
               <a [href]="'tel:' + p.tel()">{{ p.podjetje().telefon }}</a>.</p>
+            @if (email() && p.nastavitve().obvestila.strankaPrejeta) {
+              <p>Povzetek povpraševanja smo poslali tudi na <b>{{ email() }}</b>. Če ga ne vidite, preverite mapo z neželeno pošto.</p>
+            }
             <button class="gumb drugi" type="button" (click)="novo()">Nova rezervacija</button>
           </div>
         } @else {
@@ -79,6 +82,7 @@ import { danes, datumSl } from '../../util';
               </div>
               <label>E-pošta
                 <input type="email" autocomplete="email" [value]="email()" (input)="email.set(v($event))" />
+                @if (obvesti()) { <small class="namig">Neobvezno. Nanjo vam pošljemo obvestila o rezervaciji (potrdilo, potrditev termina, opomnik).</small> }
               </label>
               <label>Opomba
                 <textarea rows="3" placeholder="Priložnost, število otrok, želene barve dekoracije …" [value]="opomba()" (input)="opomba.set(v($event))"></textarea>
@@ -135,6 +139,7 @@ import { danes, datumSl } from '../../util';
     .ocena { background: #fff4cc; border-radius: 14px; padding: 12px 16px; margin: 0; }
     .gumbi { display: flex; gap: 14px; flex-wrap: wrap; }
     .drobno { color: var(--siva); font-size: .85rem; margin: 0; }
+    .namig { color: var(--siva); font-size: .82rem; font-weight: 600; }
     .soglasje { flex-direction: row; align-items: flex-start; gap: 10px; font-weight: 600; margin: 0; }
     .soglasje input { width: 20px; height: 20px; flex: none; margin-top: 2px; accent-color: var(--rdeca); }
     .uspeh { background: var(--bela); border-radius: 24px; padding: 28px; box-shadow: var(--senca); border-top: 6px solid var(--zelena); }
@@ -171,6 +176,10 @@ export class Rezervacija {
       .map((x) => ({ slug: x.slug, ime: x.ime, kategorija: x.kategorija, cena: x.cena })),
   );
   ocena = computed(() => this.postavke().reduce((s, x) => s + (x.cena ?? 0), 0));
+  obvesti = computed(() => {
+    const o = this.p.nastavitve().obvestila;
+    return o.strankaPrejeta || o.strankaStatus || o.strankaOpomnik;
+  });
   imaPoDogovoru = computed(() => this.postavke().some((x) => x.cena === null));
   veljavno = computed(() => this.pogoji() && this.izbrano().size > 0 && !!this.datum() && !!this.kraj() && !!this.ime() && !!this.telefon());
 
