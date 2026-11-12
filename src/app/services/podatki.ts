@@ -36,6 +36,7 @@ export class Podatki {
         ...shranjene,
         podjetje: { ...PRIVZETE_NASTAVITVE.podjetje, ...(shranjene.podjetje ?? {}) },
         hero: { ...PRIVZETE_NASTAVITVE.hero, ...(shranjene.hero ?? {}) },
+        obvestila: { ...PRIVZETE_NASTAVITVE.obvestila, ...(shranjene.obvestila ?? {}) },
       });
     }
     if (p.data) this.ponudba.set((p.data as Ponudba[]).map((x) => ({ ...x, cena: x.cena === null ? null : Number(x.cena) })));
@@ -59,7 +60,7 @@ export class Podatki {
   async oddaj(r: Rezervacija): Promise<string | null> {
     const c = this.supa.client;
     if (!c) return 'Baza ni povezana.';
-    const { id: _id, created_at: _c, ...vrstica } = r;
+    const { id: _id, created_at: _c, email_dnevnik: _e, ...vrstica } = r;
     const { error } = await c.from('rezervacije').insert(vrstica);
     return error ? error.message : null;
   }

@@ -1,7 +1,8 @@
 import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Postavka, Ponudba, Rezervacija, StatusRezervacije } from '../../models';
+import { EmailVnos, Postavka, Ponudba, Rezervacija, StatusRezervacije } from '../../models';
 import { AdminApi } from '../../services/admin-api';
+import { Podatki } from '../../services/podatki';
 import { danes, datumSl, telLink } from '../../util';
 
 type Filter = 'prihajajoce' | 'nove' | 'potrjene' | 'pretekle' | 'zavrnjene' | 'vse';
@@ -12,6 +13,14 @@ const STATUSI: { id: StatusRezervacije; ime: string }[] = [
   { id: 'zakljucena', ime: 'Zaključena' },
   { id: 'zavrnjena', ime: 'Zavrnjena' },
 ];
+
+const VRSTE_EMAILOV: Record<string, string> = {
+  lastnik_nova: 'obvestilo vam',
+  stranka_prejeta: 'potrdilo o prejemu',
+  stranka_potrjena: 'potrditev',
+  stranka_zavrnjena: 'zavrnitev',
+  stranka_opomnik: 'opomnik',
+};
 
 const prazna = (): Rezervacija => ({
   datum: danes(), kraj: '', prostor: 'zunaj', ime: '', telefon: '', email: '', opomba: '',
@@ -28,6 +37,7 @@ const prazna = (): Rezervacija => ({
     </div>
 
     @if (napaka()) { <p class="adm-napaka">{{ napaka() }}</p> }
+    @if (info()) { <p class="adm-ok">{{ info() }}</p> }
 
     @if (nova(); as n) {
       <form class="adm-plosca nova" (ngSubmit)="shraniNovo()">
@@ -89,6 +99,13 @@ const prazna = (): Rezervacija => ({
             <textarea rows="1" [value]="r.opomba_admin" (change)="shraniOpombo(r, $any($event.target).value)" placeholder="npr. plačano, dostava ob 9h …"></textarea>
           </label>
           <small class="prejeto">Prejeto {{ r.created_at ? cas(r.created_at) : '' }}</small>
+          @if (r.email_dnevnik?.length) {
+            <small class="emaili">✉️
+              @for (e of r.email_dnevnik; track $index; let zadnji = $last) {
+                <span [class.neuspeh]="!e.uspeh" [title]="e.uspeh ? cas(e.created_at) : e.napaka">{{ imeEmaila(e) }}{{ e.uspeh ? '' : ' ✗' }}</span>{{ zadnji ? '' : ' · ' }}
+              }
+            </small>
+          }
         </div>
         <div class="desno">
           @if (r.status === 'nova') {
@@ -129,7 +146,8 @@ const prazna = (): Rezervacija => ({
     .postavka { background: var(--adm-ozadje); border-radius: 6px; padding: 2px 8px; font-size: .88rem; }
     .opomba { margin: 4px 0 0; color: var(--siva); white-space: pre-line; }
     .interna { margin-top: 6px; font-weight: 600; }
-    .prejeto { color: var(--siva); }
+    .prejeto, .emaili { color: var(--siva); }
+    .emaili .neuspeh { color: #b42318; cursor: help; }
     .desno { display: flex; flex-direction: column; gap: 6px; align-items: stretch; min-width: 130px; }
     @media (max-width: 760px) {
       .karta { grid-template-columns: 1fr; }
@@ -143,6 +161,7 @@ export class AdminRezervacije implements OnInit {
   f = input<string>();
 
   private api = inject(AdminApi);
+  private podatki = inject(Podatki);
   datumSl = datumSl;
   tel = telLink;
   statusi = STATUSI;
@@ -161,6 +180,7 @@ export class AdminRezervacije implements OnInit {
   iskanje = signal('');
   nalagam = signal(true);
   napaka = signal('');
+  info = signal('');
   brisem = signal<string | null>(null);
   nova = signal<Rezervacija | null>(null);
 
@@ -216,6 +236,18 @@ export class AdminRezervacije implements OnInit {
     return new Date(iso).toLocaleString('sl-SI', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
 
+  imeEmaila(e: EmailVnos) {
+    return VRSTE_EMAILOV[e.vrsta] ?? e.vrsta;
+  }
+
+  /** Ali bo stranka ob tem statusu dobila e-pošto (in je še ni). */
+  private obvestiStranko(r: Rezervacija, status: StatusRezervacije): boolean {
+    if (!r.email || !this.podatki.nastavitve().obvestila.strankaStatus) return false;
+    if (status !== 'potrjena' && status !== 'zavrnjena') return false;
+    const vrsta = status === 'potrjena' ? 'stranka_potrjena' : 'stranka_zavrnjena';
+    return !(r.email_dnevnik ?? []).some((e) => e.vrsta === vrsta && e.uspeh);
+  }
+
   smsPotrditev(r: Rezervacija) {
     const t = `Pozdravljeni ${r.ime}, potrjujemo rezervacijo za ${datumSl(r.datum)} (${r.postavke.map((p) => p.ime).join(', ')}). Lep pozdrav, Kids Joy`;
     return `sms:${telLink(r.telefon)}?body=${encodeURIComponent(t)}`;
@@ -229,6 +261,7 @@ export class AdminRezervacije implements OnInit {
     await this.izvedi(async () => {
       await this.api.posodobiRezervacijo(r.id!, { status });
       this.posodobiLokalno(r.id!, { status });
+      if (this.obvestiStranko(r, status)) this.info.set(`${r.ime} bo po e-pošti (${r.email}) prejel/a ${status === 'potrjena' ? 'potrditev' : 'obvestilo o zavrnitvi'}.`);
     });
   }
 
@@ -270,11 +303,15 @@ export class AdminRezervacije implements OnInit {
       await this.api.dodajRezervacijo({ ...n, skupaj: Number(n.skupaj) || 0 });
       this.rez.set(await this.api.rezervacije());
       this.nova.set(null);
+      if (n.email && n.status === 'potrjena' && this.podatki.nastavitve().obvestila.strankaStatus) {
+        this.info.set(`${n.ime} bo po e-pošti (${n.email}) prejel/a potrditev rezervacije.`);
+      }
     });
   }
 
   private async izvedi(fn: () => Promise<void>) {
     this.napaka.set('');
+    this.info.set('');
     try {
       await fn();
     } catch (e) {

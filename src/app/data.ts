@@ -38,6 +38,14 @@ export const PRIVZETE_NASTAVITVE: Nastavitve = {
   ],
   pogojiOdpovedi:
     'Rezervacijo lahko brezplačno odpoveste najpozneje 2 dni pred dogodkom. Pri poznejši odpovedi vam lahko zaračunamo stroške, ki so nam že nastali (npr. prevoz), največ do višine 30 % cene najema.',
+  obvestila: {
+    email: '',
+    lastnikNova: true,
+    lastnikDnevni: true,
+    strankaPrejeta: true,
+    strankaStatus: true,
+    strankaOpomnik: true,
+  },
   kraji: ['Kanal', 'Renče', 'Bilje', 'Nova Gorica', 'Solkan', 'Dijaški dom'],
   vprasanja: [
     { vprasanje: 'Koliko stane najem?', odgovor: 'Cena na dan je od 60 € do 100 €, odvisno od igrala. Za dekoracije pripravimo ponudbo glede na velikost in želje.' },

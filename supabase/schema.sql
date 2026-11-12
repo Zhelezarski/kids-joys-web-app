@@ -164,3 +164,93 @@ select cron.schedule(
   '17 3 * * *',
   $$delete from public.rezervacije where datum < current_date - interval '12 months'$$
 );
+
+-- ---------- E-poštna obvestila ----------
+-- Edge Function "obvestila" (supabase/functions/obvestila) pošilja e-pošto prek Brevo.
+-- Baza jo kliče prek pg_net; zahtevo podpiše skrivnost iz Vaulta, ki jo funkcija preveri
+-- z RPC obvestila_skrivnost() (dostopen samo service_role). Ročno je treba nastaviti le
+-- skrivnost BREVO_API_KEY v Supabase → Edge Functions → Secrets (glej ADMIN.md).
+create extension if not exists pg_net with schema extensions;
+
+select vault.create_secret(encode(extensions.gen_random_bytes(32), 'hex'), 'kidsjoy_obvestila_skrivnost', 'Podpis zahtev baza → Edge Function obvestila')
+  where not exists (select 1 from vault.secrets where name = 'kidsjoy_obvestila_skrivnost');
+
+create or replace function public.obvestila_skrivnost() returns text
+language sql stable security definer set search_path = public as $$
+  select decrypted_secret from vault.decrypted_secrets where name = 'kidsjoy_obvestila_skrivnost';
+$$;
+revoke execute on function public.obvestila_skrivnost() from public, anon, authenticated;
+grant execute on function public.obvestila_skrivnost() to service_role;
+
+-- Dnevnik poslanih e-poštnih sporočil (brez vsebine; za prikaz v adminu in preprečevanje dvojnikov).
+create table if not exists public.email_dnevnik (
+  id bigint generated always as identity primary key,
+  created_at timestamptz not null default now(),
+  rezervacija_id uuid references public.rezervacije on delete cascade,
+  vrsta text not null,
+  uspeh boolean not null default false,
+  napaka text not null default ''
+);
+create index if not exists email_dnevnik_rezervacija on public.email_dnevnik (rezervacija_id);
+alter table public.email_dnevnik enable row level security;
+drop policy if exists "admini berejo" on public.email_dnevnik;
+create policy "admini berejo" on public.email_dnevnik for select using (public.je_admin());
+
+-- Pošlje dogodek Edge Functionu (asinhrono, po commitu transakcije). Napaka nikoli ne ustavi rezervacije.
+-- Ob prenosu na drug projekt zamenjaj ref v URL-ju.
+create or replace function public.obvestila_poslji(dogodek text, rez uuid default null) returns void
+language plpgsql security definer set search_path = public, extensions as $$
+declare s text;
+begin
+  s := public.obvestila_skrivnost();
+  if s is null then return; end if;
+  perform net.http_post(
+    url := 'https://ndbekxmysqgmqrrllbfm.supabase.co/functions/v1/obvestila',
+    body := jsonb_build_object('dogodek', dogodek, 'id', rez),
+    headers := jsonb_build_object('Content-Type', 'application/json', 'x-kidsjoy-skrivnost', s),
+    timeout_milliseconds := 15000
+  );
+exception when others then
+  raise warning 'kidsjoy obvestila: %', sqlerrm;
+end;
+$$;
+revoke execute on function public.obvestila_poslji(text, uuid) from public, anon, authenticated;
+
+-- Nova rezervacija s strani → lastnik + stranka; ročno vnesena potrjena (admin) → potrditev stranki;
+-- sprememba statusa v potrjena/zavrnjena → stranki.
+create or replace function public.rezervacija_obvestila() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if tg_op = 'INSERT' then
+    if public.je_admin() then
+      if new.status = 'potrjena' then perform public.obvestila_poslji('potrjena', new.id); end if;
+    else
+      perform public.obvestila_poslji('nova', new.id);
+    end if;
+  elsif new.status is distinct from old.status and new.status in ('potrjena', 'zavrnjena') then
+    perform public.obvestila_poslji(new.status, new.id);
+  end if;
+  return new;
+end;
+$$;
+revoke execute on function public.rezervacija_obvestila() from public, anon, authenticated;
+
+drop trigger if exists kidsjoy_rezervacija_obvestila on public.rezervacije;
+create trigger kidsjoy_rezervacija_obvestila
+  after insert or update of status on public.rezervacije
+  for each row execute function public.rezervacija_obvestila();
+
+-- Vsak dan ob 16:07 UTC (17:07 / 18:07 po slovenskem času): opomniki strankam za jutri in povzetek lastniku.
+select cron.unschedule('kidsjoy-dnevna-obvestila')
+  where exists (select 1 from cron.job where jobname = 'kidsjoy-dnevna-obvestila');
+select cron.schedule('kidsjoy-dnevna-obvestila', '7 16 * * *', $$select public.obvestila_poslji('dnevno')$$);
+
+-- Brisanje starih rezervacij zdaj briše tudi stare vnose dnevnika e-pošte.
+select cron.unschedule('kidsjoy-brisanje-starih-rezervacij')
+  where exists (select 1 from cron.job where jobname = 'kidsjoy-brisanje-starih-rezervacij');
+select cron.schedule(
+  'kidsjoy-brisanje-starih-rezervacij',
+  '17 3 * * *',
+  $$delete from public.rezervacije where datum < current_date - interval '12 months';
+    delete from public.email_dnevnik where created_at < now() - interval '12 months'$$
+);
