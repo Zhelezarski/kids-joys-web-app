@@ -1,10 +1,11 @@
 import { Component, inject } from '@angular/core';
 import { Podatki } from '../../services/podatki';
 import { Kartica } from '../../shared/kartica';
+import { Kombinacija } from '../../shared/kombinacija';
 
 @Component({
   selector: 'app-igrala',
-  imports: [Kartica],
+  imports: [Kartica, Kombinacija],
   template: `
     <section class="sekcija">
       <div class="okvir">
@@ -17,6 +18,7 @@ import { Kartica } from '../../shared/kartica';
           @for (i of p.igrala(); track i.slug) { <app-kartica [ponudba]="i" /> }
           @empty { @if (p.nalozeno()) { <p>Trenutno ni objavljenih igral.</p> } @else { <p>Nalagam …</p> } }
         </div>
+        <app-kombinacija />
       </div>
     </section>
   `,
