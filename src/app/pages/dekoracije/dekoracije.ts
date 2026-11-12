@@ -1,11 +1,11 @@
 import { Component, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { Podatki } from '../../services/podatki';
 import { Kartica } from '../../shared/kartica';
+import { Kombinacija } from '../../shared/kombinacija';
 
 @Component({
   selector: 'app-dekoracije',
-  imports: [RouterLink, Kartica],
+  imports: [Kartica, Kombinacija],
   template: `
     <section class="sekcija">
       <div class="okvir">
@@ -17,17 +17,9 @@ import { Kartica } from '../../shared/kartica';
         <div class="mreza">
           @for (d of p.dekoracije(); track d.slug) { <app-kartica [ponudba]="d" /> }
         </div>
-        <div class="kombinacija">
-          <h2>🎈 + 🏰 Igralo in dekoracija skupaj</h2>
-          <p>Ob najemu igrala vam pripravimo tudi dekoracijo, zato za celotno zabavo potrebujete samo en klic.</p>
-          <a routerLink="/rezervacija" class="gumb">Pošlji povpraševanje</a>
-        </div>
+        <app-kombinacija />
       </div>
     </section>
-  `,
-  styles: `
-    .kombinacija { margin-top: 40px; background: #fdeef3; border-radius: 24px; padding: 28px; }
-    .kombinacija p { color: var(--siva); }
   `,
 })
 export class Dekoracije {
