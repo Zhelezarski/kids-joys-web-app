@@ -3,8 +3,8 @@
 Website for **Napihljiva Igrala Kids Joy** (inflatable bouncy castle rental + balloon decorations,
 Nova Gorica, Slovenia). Public site + admin panel. The owner is handing it over to a friend who runs the business.
 
-**Talk to the user in Slovenian.** UI text, code identifiers, file names and commit messages are Slovenian.
-Keep that convention (e.g. `igrala`, `dekoracije`, `rezervacija`, `nastavitve`, `ponudba`).
+**Talk to the user in English.** The whole website (all UI text, content, legal texts, admin panel), code identifiers,
+file names and commit messages stay in Slovenian. Keep that convention (e.g. `igrala`, `dekoracije`, `rezervacija`, `nastavitve`, `ponudba`).
 
 ## Live
 
