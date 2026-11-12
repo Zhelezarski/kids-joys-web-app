@@ -31,6 +31,7 @@ export const routes: Routes = [
       { path: 'igrala', title: 'Igrala | Kids Joy', loadComponent: () => import('./pages/igrala/igrala').then((m) => m.Igrala) },
       { path: 'igrala/:id', title: 'Igralo | Kids Joy', loadComponent: () => import('./pages/igralo/igralo').then((m) => m.Igralo) },
       { path: 'dekoracije', title: 'Dekoracije z baloni | Kids Joy', loadComponent: () => import('./pages/dekoracije/dekoracije').then((m) => m.Dekoracije) },
+      { path: 'dekoracije/:id', title: 'Dekoracija | Kids Joy', loadComponent: () => import('./pages/igralo/igralo').then((m) => m.Igralo) },
       { path: 'rezervacija', title: 'Rezervacija | Kids Joy', loadComponent: () => import('./pages/rezervacija/rezervacija').then((m) => m.Rezervacija) },
       { path: 'zasebnost', title: 'Politika zasebnosti | Kids Joy', loadComponent: () => import('./pages/pravno/zasebnost').then((m) => m.Zasebnost) },
       { path: 'pogoji', title: 'Splošni pogoji najema | Kids Joy', loadComponent: () => import('./pages/pravno/pogoji').then((m) => m.Pogoji) },

@@ -9,7 +9,7 @@ import { Ilustracija } from '../../shared/ilustracija';
   template: `
     <section class="sekcija">
       <div class="okvir">
-        <a routerLink="/igrala" class="nazaj">← Vsa igrala</a>
+        <a [routerLink]="igralo()?.kategorija === 'dekoracija' ? '/dekoracije' : '/igrala'" class="nazaj">← {{ igralo()?.kategorija === 'dekoracija' ? 'Vse dekoracije' : 'Vsa igrala' }}</a>
         @if (igralo(); as i) {
           <div class="mreza-podrobno">
             <div>
@@ -36,19 +36,25 @@ import { Ilustracija } from '../../shared/ilustracija';
                 @if (i.mere) { <dt>Mere</dt><dd>{{ i.mere }}</dd> }
                 @if (i.starost) { <dt>Starost</dt><dd>{{ i.starost }}</dd> }
                 @if (i.nosilnost) { <dt>Nosilnost</dt><dd>{{ i.nosilnost }}</dd> }
-                <dt>Dostava</dt><dd>{{ p.podjetje().dostava }}</dd>
-                <dt>Potrebno</dt><dd>Raven prostor in električna vtičnica</dd>
+                @if (i.kategorija === 'igralo') {
+                  <dt>Dostava</dt><dd>{{ p.podjetje().dostava }}</dd>
+                  <dt>Potrebno</dt><dd>Raven prostor in električna vtičnica</dd>
+                }
               </dl>
               <ul class="znacilnosti">@for (z of i.znacilnosti; track $index) { <li>✔ {{ z }}</li> }</ul>
               <div class="gumbi">
-                <a class="gumb" routerLink="/rezervacija" [queryParams]="{ igralo: i.slug }">Rezerviraj to igralo</a>
+                @if (i.kategorija === 'igralo') {
+                  <a class="gumb" routerLink="/rezervacija" [queryParams]="{ igralo: i.slug }">Rezerviraj to igralo</a>
+                } @else {
+                  <a class="gumb" routerLink="/rezervacija" [queryParams]="{ dekoracija: i.slug }">Pošlji povpraševanje</a>
+                }
                 <a class="gumb drugi" [href]="'tel:' + p.tel()">📞 Pokliči</a>
               </div>
             </div>
           </div>
         } @else if (p.nalozeno()) {
-          <h1>Igrala ni bilo mogoče najti</h1>
-          <a routerLink="/igrala" class="gumb">Na seznam igral</a>
+          <h1>Ponudbe ni bilo mogoče najti</h1>
+          <a routerLink="/" class="gumb">Na domačo stran</a>
         } @else {
           <p>Nalagam …</p>
         }
